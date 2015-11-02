@@ -4,15 +4,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
 		var path = 'http://api.nytimes.com/svc/mostpopular/v2/mostviewed/movies/30.json?api-key=52c786f7d5fcb689e304bcbd58687057%3A5%3A73132144';
 
-		function getJSONData(path, callback) {
+		function getJSONData(path, cb) {
 		    var http = new XMLHttpRequest();
 		    http.onreadystatechange = function() {
-		        if (http.readyState === 4 && http.status === 200) {
-	                var data = JSON.parse(http.responseText);
-	                if (callback) callback(data);
+		        if (http.readyState === 4){
+					if(http.status === 200) {
+		                var data = JSON.parse(http.responseText);
+		                if (cb.success) cb.success(data);
+			        } else {
+						if (cb.failure) cb.failure();
+			        }
 		        }
 		    };
-
 		    http.open('GET', path);
 		    http.send(); 
 		}
@@ -55,8 +58,14 @@ document.addEventListener("DOMContentLoaded", function() {
 			});
 		}
 
-		getJSONData(path, function(data){
-			render(data.results)
+		getJSONData(path, {
+			success:function(data){
+				render(data.results)
+			},
+			failure: function () {
+				var mainEl = document.getElementById('main');
+				mainEl.innerText = 'Some Error in loading data';
+			}
 		});
 
 	}());
